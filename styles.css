@@ -1,0 +1,238 @@
+/* General reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+html, body {
+    height: 100%;
+}
+
+/* Fondo de la página */
+body {
+    background: linear-gradient(180deg, #2C2F38, #000000);
+    background-color: #ffffff;
+    background-repeat: no-repeat;
+    background-size: cover;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Contenedor principal para centrar */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    height: auto;
+    flex-direction: column;
+    padding: 20px;
+    height: 100%;
+}
+
+/* Título general con margen superior */
+h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: white;
+    margin-top: 40px;
+    text-align: center;
+}
+
+/* Menú principal con los recuadros */
+#main-menu {
+    display: flex;
+    gap: 1px;
+    justify-content: space-evenly;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    margin-top: 20px;
+}
+
+.card {
+    height: 200px;
+    width: 320px;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #ff416c, #ff4b2b);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.637);
+    transition: transform 0.3s ease-in-out;
+    color: #fff;
+    cursor: pointer;
+    margin: 10px;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+/* Estilo del segundo recuadro */
+.card.blue {
+    background: linear-gradient(180deg, #56ccf2, #2f80ed);
+}
+.card.green {
+    background: linear-gradient(180deg, #56f285, #2fed3f);
+}
+
+/* Iconos dentro de los recuadros */
+.icono {
+    filter: drop-shadow(0 0 5px #000000);
+    margin-bottom: 10px;
+    width: 80px;
+}
+
+/* Texto dentro de los recuadros */
+.card h3 {
+    font-size: 1.7rem;
+    margin-bottom: 10px;
+}
+
+.dashboard-container {
+    width: 320px;
+    background-color: #ffffff1a;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+}
+/* Agrega esta clase en tu archivo CSS */
+.move-left {
+    transition: transform 0.5s ease; /* Tiempo de la transición */
+    transform: translateX(-50%); /* Mueve 50% a la izquierda */
+}
+
+.top-card {
+    background: linear-gradient(180deg, #ff416c, #ff4b2b);
+    border-radius: 20px;
+    padding: 30px 20px;
+    text-align: center;
+    color: white;
+    margin-bottom: 20px;
+    position: relative;
+}
+.top-card.blue {
+    background: linear-gradient(180deg, #56ccf2, #2f80ed);
+}
+.top-card.green {
+    background: linear-gradient(180deg, #56f285, #2fed3f);
+}
+
+
+.section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+.form-container {
+    position: absolute;
+    width: 300px;
+    height: 410px;
+    background-color: #ffffff1a;
+    border-radius: 20px;
+    padding: 20px;
+    transform: translateX(0%);
+    opacity: 0;
+    transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+}
+
+.form-container.active {
+    transform: translateX(50%);
+    transition: transform 0.5s ease; /* Transición suave */
+    opacity: 1;
+}
+
+/* Estilos para los formularios */
+.form-container form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-container input,
+.form-container select,
+.form-container button {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+}
+
+.form-container button {
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+
+.form-container button:hover {
+    background-color: #45a049;
+}
+
+/* Estilos para los mensajes de error */
+.error-message {
+    color: #ff0000;
+    margin-top: 5px;
+    font-size: 0.9em;
+}
+.error {
+    border: 1px solid #ff0000;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .section {
+        flex-direction: column;
+    }
+
+    .form-container {
+        width: 92%;
+        margin-left: 0;
+        margin-top: 20px;
+    }
+
+    .dashboard-container {
+        width: 100%;
+    }
+}
+
+
+
+
+/* Estilos para pantallas móviles */
+@media (max-width: 768px) {
+    .form-container {
+        transform: translateY(0%); /* Iniciar fuera de la vista */
+        transition: transform 0.5s ease; /* Transición suave */
+    }
+
+    .form-container.active {
+        transform: translateY(100%); /* Desplazarse a su posición original */
+        transition: transform 0.5s ease; /* Transición suave */
+    }
+
+    .dashboard-container {
+        transition: none; /* Sin movimiento para el contenedor del dashboard en móviles */
+    }
+}
+
+/* Para pantallas de escritorio y tablet */
+@media (min-width: 769px) {
+    .form-container {
+        transform: translatex(0%); /* Iniciar fuera de la vista */
+        transition: transform 0.5s ease; /* Transición suave */
+    }
+
+    .form-container.active {
+        transform: translatex(55%); /* Desplazarse a su posición original */
+        transition: transform 0.5s ease; /* Transición suave */
+    }
+
+    .dashboard-container.active {
+        transform: translateX(-55%); /* Mover el dashboard hacia la izquierda */
+        transition: transform 0.5s ease; /* Transición suave */
+    }
+}
