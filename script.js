@@ -17,126 +17,133 @@ document.addEventListener("DOMContentLoaded", () => {
         ventas: []
     };
 
-    // Contadores de ID que comienzan en 1
     let idCounterClientes = 1;
     let idCounterProductos = 1;
     let idCounterVentas = 1;
 
-    // Función para abrir la sección seleccionada
+    let currentOpenForm = null;
+    let currentOpenAction = null;
+
     window.openSection = function(section) {
-        // Ocultar todas las secciones primero
         document.querySelectorAll('.section').forEach(function(sec) {
             sec.classList.add('d-none');
         });
         
-        // Mostrar la sección seleccionada
         const selectedSection = document.getElementById(`section-${section}`);
         if (selectedSection) {
             selectedSection.classList.remove('d-none');
         }
         
-        // Ocultar el menú principal
         document.getElementById('main-menu').classList.add('d-none');
     }
 
-    // Función para volver al menú principal
     window.goBack = function() {
-        // Ocultar todas las secciones
         document.querySelectorAll('.section').forEach(function(sec) {
             sec.classList.add('d-none');
         });
         
-        // Mostrar el menú principal
         document.getElementById('main-menu').classList.remove('d-none');
     
-        // Ocultar todos los formularios
         document.querySelectorAll('.form-container').forEach(function(form) {
             form.classList.remove('active');
         });
     
-        // Quitar la clase para mover el dashboard
-        document.querySelector('.dashboard-container').classList.remove('move-left');
-    }
+        document.querySelectorAll('.dashboard-container').forEach(function(dashboard) {
+            dashboard.classList.remove('active');
+        });
     
+        currentOpenForm = null;
+    }
 
-    // Función para mostrar los formularios
     window.showForm = function (section, action) {
         const formContainer = document.getElementById(`form-container-${section}`);
-        const dashboardContainer = document.querySelector('.dashboard-container');
-    
-        // Verificar si el formulario ya está visible
-        if (formContainer.classList.contains('active')) {
-            // Ocultar el formulario
+        const dashboardContainer = document.querySelector(`#section-${section} .dashboard-container`);
+
+        // Si se toca el mismo botón del formulario abierto, cerrar el formulario
+        if (currentOpenForm === formContainer && currentOpenAction === action) {
             formContainer.classList.remove('active');
-            // Remover la clase active del dashboardContainer solo si no es móvil
             if (window.innerWidth > 768) {
                 dashboardContainer.classList.remove('active');
             }
-        } else {
-            // Limpiar el contenido del formulario
-            formContainer.innerHTML = '';
-    
-            let formHtml = '';
-            switch (action) {
-                case 'load':
-                    formHtml = generateForm(section);
-                    break;
-                case 'consult':
-                    consultData(section);
-                    return;
-                case 'search':
-                    formHtml = `<input type="text" id="search-${section}" placeholder="Buscar ${capitalize(section)}">
-                                <button onclick="searchData('${section}')">Buscar</button>`;
-                    break;
-                case 'modify':
-                    formHtml = `<input type="number" id="modify-id-${section}" placeholder="ID a modificar">
-                                ${generateForm(section, true)}
-                                <button onclick="modifyData('${section}')">Modificar</button>`;
-                    break;
-                case 'delete':
-                    formHtml = `<input type="number" id="delete-id-${section}" placeholder="ID a eliminar">
-                                <button onclick="deleteData('${section}')">Eliminar</button>`;
-                    break;
-                case 'undo':
-                    undoAction(section);
-                    return;
-            }            
-            formContainer.innerHTML = formHtml;
-    
-            // Activar la animación del formulario
-            setTimeout(() => {
-                formContainer.classList.add('active');
-                
-                // Mover el dashboard solo si no es móvil
-                if (window.innerWidth > 768) {
-                    dashboardContainer.classList.add('active');
-                }
-            }, 50);
+            currentOpenForm = null;
+            currentOpenAction = null;
+            return;
         }
-    };
-    
 
-    
+        // Ocultar el formulario actual si existe
+        if (currentOpenForm) {
+            currentOpenForm.classList.remove('active');
+            const currentDashboard = currentOpenForm.closest('.section').querySelector('.dashboard-container');
+            if (currentDashboard && window.innerWidth > 768) {
+                currentDashboard.classList.remove('active');
+            }
+        }
+
+        // Limpiar y actualizar el contenido del formulario
+        formContainer.innerHTML = '';
+        let formHtml = '';
+
+        switch (action) {
+            case 'load':
+                formHtml = generateForm(section);
+                break;
+            case 'consult':
+                formHtml = `<h3>Consultar ${capitalize(section)}</h3>
+                            <div id="consult-result-${section}"></div>`;
+                setTimeout(() => consultData(section), 0);
+                break;
+            case 'search':
+                formHtml = `<h3>Buscar ${capitalize(section)}</h3>
+                            <input type="text" id="search-${section}" placeholder="Buscar ${capitalize(section)}">
+                            <button onclick="searchData('${section}')">Buscar</button>
+                            <div id="search-result-${section}"></div>`;
+                break;
+            case 'modify':
+                formHtml = `<h3>Modificar ${capitalize(section)}</h3>
+                            <input type="number" id="modify-id-${section}" placeholder="ID a modificar">
+                            ${generateForm(section, true)}
+                            <button onclick="modifyData('${section}')">Modificar</button>`;
+                break;
+            case 'delete':
+                formHtml = `<h3>Eliminar ${capitalize(section)}</h3>
+                            <input type="number" id="delete-id-${section}" placeholder="ID a eliminar">
+                            <button onclick="deleteData('${section}')">Eliminar</button>`;
+                break;
+            case 'undo':
+                formHtml = `<h3>Deshacer última acción</h3>
+                            <button onclick="undoAction('${section}')">Deshacer</button>`;
+                break;
+        }            
+        formContainer.innerHTML = formHtml;
+
+        // Mostrar el nuevo formulario
+        formContainer.classList.add('active');
+        if (window.innerWidth > 768) {
+            dashboardContainer.classList.add('active');
+        }
+
+        // Actualizar el formulario actual y la acción actual
+        currentOpenForm = formContainer;
+        currentOpenAction = action;
+    };
+
     function generateForm(section, isModify = false) {
         if (section === 'clientes') {
-            return `
-                <h3>${isModify ? 'Modificar' : 'Cargar'} Cliente</h3>
+            return `<h3> Clientes </h3>
                 <input type="text" id="${section}-nombre" placeholder="Nombre">
                 <input type="text" id="${section}-apellido" placeholder="Apellido">
                 <input type="text" id="${section}-direccion" placeholder="Dirección">
                 <input type="text" id="${section}-localidad" placeholder="Localidad">
                 ${isModify ? '' : `<button onclick="saveData('${section}')">Guardar</button>`}`;
         } else if (section === 'productos') {
-            return `
-                <h3>${isModify ? 'Modificar' : 'Cargar'} Producto</h3>
+            return `<h3> Productos </h3>
                 <input type="text" id="${section}-nombre" placeholder="Nombre del producto">
                 <input type="text" id="${section}-descripcion" placeholder="Descripción">
                 <input type="date" id="${section}-vencimiento" placeholder="Fecha de Vencimiento">
                 <input type="number" id="${section}-precio" placeholder="Precio">
                 ${isModify ? '' : `<button onclick="saveData('${section}')">Guardar</button>`}`;
         } else if (section === 'ventas') {
-            return `
-                <h3>${isModify ? 'Modificar' : 'Cargar'} Venta</h3>
+            return `<h3> Ventas </h3>
                 <select id="venta-cliente">${generateOptions('clientes')}</select>
                 <select id="venta-producto">${generateOptions('productos')}</select>
                 <input type="number" id="venta-cantidad" placeholder="Cantidad">
@@ -148,77 +155,70 @@ document.addEventListener("DOMContentLoaded", () => {
         return data[section].map((item, index) => `<option value="${index}">${item.nombre}</option>`).join('');
     }
 
-    // Función para consultar datos
     window.consultData = function (section) {
-        const formContainer = document.getElementById(`form-container-${section}`);
-        let tableHtml = `<table>
+        const resultContainer = document.getElementById(`consult-result-${section}`);
+        let tableHtml = `<table class="custom-table">
                             <thead>
                                 <tr>${generateTableHeaders(section)}</tr>
                             </thead>
                             <tbody>`;
-
+    
         data[section].forEach((item) => {
             tableHtml += `<tr>${generateTableRows(item, section)}</tr>`;
         });
-
+    
         tableHtml += `</tbody></table>`;
-        formContainer.innerHTML = tableHtml;
-
-        // Activar la animación del formulario
-        setTimeout(() => {
-            formContainer.classList.add('active');
-        }, 50);
+        resultContainer.innerHTML = tableHtml;
     };
-
+    
     function generateTableHeaders(section) {
-        if (section === 'clientes') {
-            return '<th>ID</th><th>Nombre</th><th>Apellido</th><th>Dirección</th><th>Localidad</th>';
-        } else if (section === 'productos') {
-            return '<th>ID</th><th>Nombre</th><th>Descripción</th><th>Fecha de Vencimiento</th><th>Precio</th>';
-        } else if (section === 'ventas') {
-            return '<th>ID</th><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Total</th>';
+        switch (section) {
+            case 'clientes':
+                return '<th>ID</th><th>Nombre</th><th>Apellido</th><th>Dirección</th><th>Localidad</th>';
+            case 'productos':
+                return '<th>ID</th><th>Nombre</th><th>Descripción</th><th>Fecha de Vencimiento</th><th>Precio</th>';
+            case 'ventas':
+                return '<th>ID</th><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Total</th>';
+            default:
+                return '';
         }
     }
-
+    
     function generateTableRows(item, section) {
-        if (section === 'clientes') {
-            return `<td>${item.id}</td><td>${item.nombre}</td><td>${item.apellido}</td><td>${item.direccion}</td><td>${item.localidad}</td>`;
-        } else if (section === 'productos') {
-            return `<td>${item.id}</td><td>${item.nombre}</td><td>${item.descripcion}</td><td>${item.vencimiento}</td><td>$${item.precio}</td>`;
-        } else if (section === 'ventas') {
-            return `<td>${item.id}</td><td>${item.cliente.nombre}</td><td>${item.producto.nombre}</td><td>${item.cantidad}</td><td>$${item.total}</td>`;
+        switch (section) {
+            case 'clientes':
+                return `<td>${item.id}</td><td>${item.nombre}</td><td>${item.apellido}</td><td>${item.direccion}</td><td>${item.localidad}</td>`;
+            case 'productos':
+                return `<td>${item.id}</td><td>${item.nombre}</td><td>${item.descripcion}</td><td>${item.vencimiento}</td><td>$${item.precio.toFixed(2)}</td>`;
+            case 'ventas':
+                return `<td>${item.id}</td><td>${item.cliente.nombre} ${item.cliente.apellido}</td><td>${item.producto.nombre}</td><td>${item.cantidad}</td><td>$${item.total.toFixed(2)}</td>`;
+            default:
+                return '';
         }
     }
 
-    // Función para buscar datos
     window.searchData = function (section) {
-        const searchQuery = document.getElementById(`search-${section}`).value.trim();
-
-        let filteredData;
-        if (!isNaN(searchQuery) && searchQuery !== '') {
-            // Si el valor es un número, busca solo por ID
-            const id = parseInt(searchQuery);
-            filteredData = data[section].filter(item => item.id === id);
-        } else {
-            // Si no es un número, busca en todos los campos
-            filteredData = data[section].filter(item => {
-                return Object.values(item).some(val => val.toString().toLowerCase().includes(searchQuery.toLowerCase()));
-            });
-        }
-
-        const formContainer = document.getElementById(`form-container-${section}`);
-        let tableHtml = `<table>
+        const searchQuery = document.getElementById(`search-${section}`).value.trim().toLowerCase();
+        const resultContainer = document.getElementById(`search-result-${section}`);
+    
+        let filteredData = data[section].filter(item => 
+            Object.values(item).some(val => 
+                val.toString().toLowerCase().includes(searchQuery)
+            )
+        );
+    
+        let tableHtml = `<table class="custom-table">
                             <thead>
                                 <tr>${generateTableHeaders(section)}</tr>
                             </thead>
                             <tbody>`;
-
+    
         filteredData.forEach((item) => {
             tableHtml += `<tr>${generateTableRows(item, section)}</tr>`;
         });
-
+    
         tableHtml += `</tbody></table>`;
-        formContainer.innerHTML = tableHtml;
+        resultContainer.innerHTML = tableHtml;
 
         // Activar la animación del formulario
         setTimeout(() => {
@@ -226,7 +226,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 50);
     };
 
-    // Función para modificar datos
     window.modifyData = function (section) {
         const id = document.getElementById(`modify-id-${section}`).value;
 
@@ -260,10 +259,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         data[section][itemIndex] = modifiedData;
 
-        alert(`${capitalize(section.slice(0, -1))} modificado exitosamente`);
+        alert(`${capitalize(section.slice(0, -1))} modificado exitosamente`);    
     };
 
-    // Función para eliminar datos
     window.deleteData = function (section) {
         const id = document.getElementById(`delete-id-${section}`).value;
 
@@ -277,7 +275,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         data[section].splice(itemIndex, 1);
 
-        alert(`${capitalize(section.slice(0, -1))} eliminado exitosamente`);
+        alert(`${capitalize(section.slice(0, -1))} eliminado exitosamente`);    
     };
 
     window.undoAction = function (section) {
@@ -288,14 +286,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         data[section] = [...previousData[section]];
 
-        alert(`Última acción deshecha`);
+        alert(`Última acción deshecha`);   
     };
 
     function capitalize(str) {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
-    // Mostrar mensaje de error debajo del campo
     function showErrorMessage(inputId, message) {
         const inputElement = document.getElementById(inputId);
         inputElement.classList.add('error');
@@ -310,10 +307,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         
         errorMessageElement.textContent = message;
-        errorMessageElement.style.display = 'block';
+        errorMessageElement.style.display = 'block';    
     }
     
-    // Ocultar el mensaje de error
     function hideErrorMessage(inputId) {
         const inputElement = document.getElementById(inputId);
         inputElement.classList.remove('error');
@@ -321,16 +317,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const errorMessageElement = document.getElementById(`${inputId}-error`);
         if (errorMessageElement) {
             errorMessageElement.style.display = 'none';
-        }
+        }    
     }
     
-    // Función para validar nombre y apellido
     function isValidName(name) {
         const regex = /^[a-zA-Z\s]+$/; // Solo permite letras y espacios
-        return regex.test(name);
-    }
+        return regex.test(name);    }
     
-    // Modificar la función para guardar los datos y marcar los errores
     window.saveData = function (section) {
         const newData = {};
         let hasError = false;
@@ -386,6 +379,16 @@ document.addEventListener("DOMContentLoaded", () => {
             newData.apellido = apellido;
             newData.direccion = direccion;
             newData.localidad = localidad;
+
+            const nombreHTML = document.getElementById('clientes-nombre')
+            const apellidoHTML = document.getElementById('clientes-apellido')
+            const direccionHTML = document.getElementById('clientes-direccion')
+            const localidadHTML = document.getElementById('clientes-localidad')
+
+            nombreHTML.value = '';
+            apellidoHTML.value = '';
+            direccionHTML.value = '';
+            localidadHTML.value = '';
         }
     
         if (section === 'productos') {
@@ -429,6 +432,16 @@ document.addEventListener("DOMContentLoaded", () => {
             newData.descripcion = descripcion;
             newData.vencimiento = vencimiento;
             newData.precio = parseFloat(precio);
+
+            const nombreProductoHTML = document.getElementById('productos-nombre')
+            const descripcionHTML = document.getElementById('productos-descripcion')
+            const vencimientoHTML = document.getElementById('productos-vencimiento')
+            const precioHTML = document.getElementById('productos-precio')
+
+            nombreProductoHTML.value = ''
+            descripcionHTML.value = ''
+            vencimientoHTML.value = ''
+            precioHTML.value = ''
         }
     
         if (section === 'ventas') {
@@ -467,6 +480,14 @@ document.addEventListener("DOMContentLoaded", () => {
             newData.producto = producto;
             newData.cantidad = parseInt(cantidad);
             newData.total = newData.cantidad * producto.precio;
+
+            const clienteIndexHTML = document.getElementById('venta-cliente')
+            const productoIndexHTML = document.getElementById('venta-producto')
+            const cantidadHTML = document.getElementById('venta-cantidad')
+
+            clienteIndexHTML.value = ''
+            productoIndexHTML.value = ''
+            cantidadHTML.value = ''
         }
     
         // Si no hay errores, guardar los datos
@@ -474,4 +495,12 @@ document.addEventListener("DOMContentLoaded", () => {
         data[section].push(newData);
         alert(`${capitalize(section.slice(0, -1))} guardado exitosamente`);
     };
+
+    // Agregar event listeners para los botones de "Volver al Menú"
+    document.querySelectorAll('.btn-primary[onclick="goBack()"]').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            goBack();
+        });
+    });
 });
