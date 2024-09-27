@@ -131,20 +131,24 @@ h1 {
 }
 .form-container {
     position: absolute;
-    width: 300px;
+    width: 500px;
     height: 410px;
     background-color: #ffffff1a;
     border-radius: 20px;
     padding: 20px;
-    transform: translateX(0%);
+    transform: translateX(-100%);
     opacity: 0;
     transition: transform 0.5s ease-out, opacity 0.5s ease-out;
 }
 
 .form-container.active {
-    transform: translateX(50%);
-    transition: transform 0.5s ease; /* Transición suave */
+    transform: translateX(0%);
     opacity: 1;
+}
+
+.form-container.closing {
+    transform: translateX(-100%);
+    opacity: 0;
 }
 
 /* Estilos para los formularios */
@@ -176,11 +180,59 @@ h1 {
 .error-message {
     color: #ff0000;
     margin-top: 5px;
+    margin-bottom: 5px;
     font-size: 0.9em;
+    width: 200px;
 }
 .error {
     border: 1px solid #ff0000;
 }
+
+
+.custom-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 20px;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.custom-table th,
+.custom-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.custom-table th {
+    background-color: rgba(255, 255, 255, 0.1);
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.9em;
+    color: #fff;
+}
+
+.custom-table tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.custom-table tr:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.custom-table td:first-child,
+.custom-table th:first-child {
+    padding-left: 20px;
+}
+
+.custom-table td:last-child,
+.custom-table th:last-child {
+    padding-right: 20px;
+}
+
 
 /* Responsive design */
 @media (max-width: 768px) {
@@ -199,40 +251,45 @@ h1 {
     }
 }
 
-
-
-
 /* Estilos para pantallas móviles */
 @media (max-width: 768px) {
+    .dashboard-container {
+        transition: none; /* Sin movimiento para el contenedor del dashboard en móviles */
+    }
     .form-container {
-        transform: translateY(0%); /* Iniciar fuera de la vista */
-        transition: transform 0.5s ease; /* Transición suave */
+        transform: translatey(0%);
     }
 
     .form-container.active {
-        transform: translateY(100%); /* Desplazarse a su posición original */
-        transition: transform 0.5s ease; /* Transición suave */
+        transform: translatey(100%);
     }
 
-    .dashboard-container {
-        transition: none; /* Sin movimiento para el contenedor del dashboard en móviles */
+    .form-container.closing {
+        transform: translatey(0%);
     }
 }
 
 /* Para pantallas de escritorio y tablet */
 @media (min-width: 769px) {
     .form-container {
-        transform: translatex(0%); /* Iniciar fuera de la vista */
-        transition: transform 0.5s ease; /* Transición suave */
+        transform: translateX(0%);
     }
 
     .form-container.active {
-        transform: translatex(55%); /* Desplazarse a su posición original */
-        transition: transform 0.5s ease; /* Transición suave */
+        transform: translateX(35%);
     }
 
+    .form-container.closing {
+        transform: translateX(0%);
+    }
+    .dashboard-container{
+        transform: translateX(0%);
+        transition: transform 0.5s ease;
+    }
     .dashboard-container.active {
-        transform: translateX(-55%); /* Mover el dashboard hacia la izquierda */
-        transition: transform 0.5s ease; /* Transición suave */
+        transform: translateX(-80%);
+    }
+    .dashboard-container.closing {
+        transform: translateX(0%);
     }
 }
